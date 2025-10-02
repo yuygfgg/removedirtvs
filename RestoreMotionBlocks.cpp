@@ -1,4 +1,5 @@
 #include "shared.h"
+#include <cstdlib>
 
 typedef struct {
     VSNodeRef* input;
@@ -16,6 +17,7 @@ typedef struct {
 
 static void VS_CC RestoreMotionBlocksFree(void* instanceData, VSCore* core,
                                           const VSAPI* vsapi) {
+    (void)core;
     RestoreMotionBlocksData* d = (RestoreMotionBlocksData*)instanceData;
     vsapi->freeNode(d->input);
 
@@ -35,6 +37,7 @@ static void VS_CC RestoreMotionBlocksFree(void* instanceData, VSCore* core,
 static const VSFrameRef* VS_CC RestoreMotionBlocksGetFrame(
     int32_t n, int32_t activationReason, void** instanceData, void** frameData,
     VSFrameContext* frameCtx, VSCore* core, const VSAPI* vsapi) {
+    (void)frameData;
     RestoreMotionBlocksData* d = (RestoreMotionBlocksData*)*instanceData;
 
     if (activationReason == arInitial) {
@@ -90,6 +93,9 @@ static const VSFrameRef* VS_CC RestoreMotionBlocksGetFrame(
 static void VS_CC RestoreMotionBlocksInit(VSMap* in, VSMap* out,
                                           void** instanceData, VSNode* node,
                                           VSCore* core, const VSAPI* vsapi) {
+    (void)in;
+    (void)out;
+    (void)core;
     RestoreMotionBlocksData* d = (RestoreMotionBlocksData*)*instanceData;
     vsapi->setVideoInfo(d->vi, 1, node);
 }
@@ -97,7 +103,8 @@ static void VS_CC RestoreMotionBlocksInit(VSMap* in, VSMap* out,
 void VS_CC RestoreMotionBlocksCreate(const VSMap* in, VSMap* out,
                                      void* userData, VSCore* core,
                                      const VSAPI* vsapi) {
-    RestoreMotionBlocksData d = {0};
+    (void)userData;
+    RestoreMotionBlocksData d = {};
 
     d.input = vsapi->propGetNode(in, "input", 0, 0);
     d.vi = vsapi->getVideoInfo(d.input);

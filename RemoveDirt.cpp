@@ -16,6 +16,7 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA, or visit
 // http://www.gnu.org/copyleft/gpl.html .
 
+#include "VSHelper.h"
 #include "shared.h"
 #include <stdint.h>
 
@@ -70,6 +71,7 @@ uint32_t ALIGNED_ARRAY(blockcompare_result, 16)[4];
 static __forceinline void SADcompareSSE2(const uint8_t* p1, const uint8_t* p2,
                                          int32_t pitch,
                                          const uint8_t* noiselevel) {
+    (void)noiselevel;
     uint32_t sad0 = 0;
     uint32_t sad1 = 0;
 
@@ -178,6 +180,7 @@ static __forceinline void ExcessPixelsSSE2(const uint8_t* p1, const uint8_t* p2,
 static __forceinline uint32_t SADcompare(const uint8_t* p1, int32_t pitch1,
                                          const uint8_t* p2, int32_t pitch2,
                                          const uint8_t* noiselevel) {
+    (void)noiselevel;
     uint32_t sad = 0;
 
     // Process 8x8 block (8 bytes wide, 8 rows)
@@ -332,7 +335,7 @@ static void markneighbours(MotionDetectionDistData* mdd) {
             *isum2++ = (sum += *end++);
         } while (--i);
 
-        i = mdd->hint32_terior;
+        i = mdd->hint32_terior; 
         do {
             *isum2++ = (sum += *end++ - *begin++);
         } while (--i);
@@ -434,7 +437,7 @@ static void markblocks2(MotionDetectionData* md, const uint8_t* p1,
         int32_t i = md->hblocksSSE2;
 
         do {
-            md->blockcompareSSE2(p1, p2, pitch, md->noiselevel);
+            md->blockcompareSSE2(p1, p2, pitch, md->noiselevel); 
             properties[0] = properties[1] = 0;
 
             if (blockcompare_result[0] >= md->threshold) {
@@ -485,8 +488,7 @@ static void markblocks(MotionDetectionDistData* mdd, const uint8_t* p1,
     }
 }
 
-static __forceinline int32_t vertical_diff(const uint8_t* p, int32_t pitch,
-                                           const uint8_t* noiselevel) {
+static __forceinline int32_t vertical_diff(const uint8_t* p, int32_t pitch) {
     uint32_t sad = 0;
 
     // Process 4 bytes wide, 8 rows, comparing vertical neighbors
@@ -544,10 +546,8 @@ static void postprocessing_grey(PostProcessingData* pp, uint8_t* dp,
                     cl[0] &= ~TO_CLEAN;
 
                     if (cl[-1] == 0) {
-                        if (vertical_diff(dp2 + leftdp, dpitch,
-                                          pp->mdd.md.noiselevel) >
-                            vertical_diff(sp2 + leftsp, spitch,
-                                          pp->mdd.md.noiselevel) +
+                        if (vertical_diff(dp2 + leftdp, dpitch) >
+                            vertical_diff(sp2 + leftsp, spitch) +
                                 pp->pthreshold) {
                             ++to_restore;
                             cl[-1] = MOTION_FLAG3;
@@ -555,10 +555,8 @@ static void postprocessing_grey(PostProcessingData* pp, uint8_t* dp,
                     }
 
                     if (cl[1] == 0) {
-                        if (vertical_diff(dp2 + rightdp, dpitch,
-                                          pp->mdd.md.noiselevel) >
-                            vertical_diff(sp2 + rightsp, spitch,
-                                          pp->mdd.md.noiselevel) +
+                        if (vertical_diff(dp2 + rightdp, dpitch) >
+                            vertical_diff(sp2 + rightsp, spitch) +
                                 pp->pthreshold) {
                             ++to_restore;
                             cl[1] = MOTION_FLAG3;
@@ -617,6 +615,7 @@ horizontal_diff_chroma(const uint8_t* u, const uint8_t* v, int32_t pitch) {
 static __forceinline int32_t
 vertical_diff_yv12_chroma(const uint8_t* u, const uint8_t* v, int32_t pitch,
                           const uint8_t* noiselevel) {
+    (void)noiselevel;
     uint32_t sad = 0;
 
     // Process U channel: 4 bytes wide, 4 rows, comparing vertical neighbors
@@ -645,6 +644,7 @@ vertical_diff_yv12_chroma(const uint8_t* u, const uint8_t* v, int32_t pitch,
 static __forceinline int32_t
 vertical_diff_yuy2_chroma(const uint8_t* u, const uint8_t* v, int32_t pitch,
                           const uint8_t* noiselevel) {
+    (void)noiselevel;
     uint32_t sad_u = 0;
     uint32_t sad_v = 0;
 
@@ -712,7 +712,7 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
         const uint8_t* spV2 = spV;
         uint8_t* cl = pp->mdd.md.blockproperties;
         ++pp->loops;
-        to_restore = 0;
+        to_restore = 0; 
 
         int32_t i = pp->mdd.md.vblocks;
 
@@ -727,10 +727,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                     cl[0] &= ~TO_CLEAN;
 
                     if (cl[-1] == 0) {
-                        if ((vertical_diff(dp2 + leftdp, dpitch,
-                                           pp->mdd.md.noiselevel) >
-                             vertical_diff(sp2 + leftsp, spitch,
-                                           pp->mdd.md.noiselevel) +
+                        if ((vertical_diff(dp2 + leftdp, dpitch) >
+                             vertical_diff(sp2 + leftsp, spitch) +
                                  pp->pthreshold) ||
                             (pp->vertical_diff_chroma(dpU2 + Cleftdp,
                                                       dpV2 + Cleftdp, dpitchUV,
@@ -739,16 +737,14 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                                                       spV2 + Cleftsp, spitchUV,
                                                       pp->mdd.md.noiselevel) +
                                  pp->cthreshold)) {
-                            ++to_restore;
-                            cl[-1] = MOTION_FLAG3;
+                                ++to_restore;
+                                cl[-1] = MOTION_FLAG3;
                         }
                     }
 
                     if (cl[1] == 0) {
-                        if ((vertical_diff(dp2 + rightdp, dpitch,
-                                           pp->mdd.md.noiselevel) >
-                             vertical_diff(sp2 + rightsp, spitch,
-                                           pp->mdd.md.noiselevel) +
+                        if ((vertical_diff(dp2 + rightdp, dpitch) >
+                             vertical_diff(sp2 + rightsp, spitch) +
                                  pp->pthreshold) ||
                             (pp->vertical_diff_chroma(dpU2 + Crightdp,
                                                       dpV2 + Crightdp, dpitchUV,
@@ -757,8 +753,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                                                       spV2 + Crightsp, spitchUV,
                                                       pp->mdd.md.noiselevel) +
                                  pp->cthreshold)) {
-                            ++to_restore;
-                            cl[1] = MOTION_FLAG3;
+                                ++to_restore;
+                                cl[1] = MOTION_FLAG3;
                         }
                     }
 
@@ -771,8 +767,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                              horizontal_diff_chroma(spU2 + Ctopsp,
                                                     spV2 + Ctopsp, spitchUV) +
                                  pp->cthreshold)) {
-                            ++to_restore;
-                            cl[pp->mdd.md.pline] = MOTION_FLAG3;
+                                ++to_restore;
+                                cl[pp->mdd.md.pline] = MOTION_FLAG3;
                         }
                     }
 
@@ -785,8 +781,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                              horizontal_diff_chroma(
                                  spU2 + Cbottomsp, spV2 + Cbottomsp, spitchUV) +
                                  pp->cthreshold)) {
-                            ++to_restore;
-                            cl[pp->mdd.md.nline] = MOTION_FLAG3;
+                                ++to_restore;
+                                cl[pp->mdd.md.nline] = MOTION_FLAG3;
                         }
                     }
                 }
@@ -826,7 +822,7 @@ static void show_motion(PostProcessingData* pp, uint8_t* u, uint8_t* v,
 
         do {
             if (properties[0]) {
-                uint32_t u_color = u_ncolor;
+                uint32_t u_color = u_ncolor; 
                 uint32_t v_color = v_ncolor;
                 if ((properties[0] & MOTION_FLAG) != 0) {
                     u_color = u_mcolor;
@@ -853,7 +849,7 @@ static void show_motion(PostProcessingData* pp, uint8_t* u, uint8_t* v,
 static void FillMotionDetection(MotionDetectionData* md, const VSMap* in,
                                 VSMap* out, const VSAPI* vsapi,
                                 const VSVideoInfo* vi) {
-    int32_t err;
+    int32_t err;    
     int32_t noise = (int32_t)vsapi->propGetInt(in, "noise", 0, &err);
     if (err) {
         noise = 0;

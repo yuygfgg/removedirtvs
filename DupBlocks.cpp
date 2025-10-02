@@ -11,6 +11,7 @@ typedef struct {
 
 static void VS_CC DupBlocksFree(void* instanceData, VSCore* core,
                                 const VSAPI* vsapi) {
+    (void)core;
     DupBlocksData* d = (DupBlocksData*)instanceData;
     vsapi->freeNode(d->input);
     vsapi->freeFrame(d->lf);
@@ -20,6 +21,7 @@ static void VS_CC DupBlocksFree(void* instanceData, VSCore* core,
 static const VSFrameRef* VS_CC DupBlocksGetFrame(
     int32_t n, int32_t activationReason, void** instanceData, void** frameData,
     VSFrameContext* frameCtx, VSCore* core, const VSAPI* vsapi) {
+    (void)frameData;
     DupBlocksData* d = (DupBlocksData*)*instanceData;
 
     if (activationReason == arInitial) {
@@ -57,13 +59,17 @@ static const VSFrameRef* VS_CC DupBlocksGetFrame(
 static void VS_CC DupBlocksInit(VSMap* in, VSMap* out, void** instanceData,
                                 VSNode* node, VSCore* core,
                                 const VSAPI* vsapi) {
+    (void)in;
+    (void)out;
+    (void)core;
     DupBlocksData* d = (DupBlocksData*)*instanceData;
     vsapi->setVideoInfo(d->vi, 1, node);
 }
 
 void VS_CC DupBlocksCreate(const VSMap* in, VSMap* out, void* userData,
                            VSCore* core, const VSAPI* vsapi) {
-    DupBlocksData d = {0};
+    (void)userData;
+    DupBlocksData d = {};
 
     d.input = vsapi->propGetNode(in, "input", 0, 0);
     d.vi = vsapi->getVideoInfo(d.input);

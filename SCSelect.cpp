@@ -6,16 +6,16 @@ typedef struct {
     VSNodeRef* sceneEnd;
     VSNodeRef* globalMotion;
     const VSVideoInfo* vi;
-    int32_t dfactor;
     int32_t hblocks;
     int32_t incpitch;
     uint32_t lastdiff;
-    uint32_t lnr;
+    int32_t lnr;
     double dirmult;
 } SCSelectData;
 
 static void VS_CC SCSelectFree(void* instanceData, VSCore* core,
                                const VSAPI* vsapi) {
+    (void)core;
     SCSelectData* d = (SCSelectData*)instanceData;
     vsapi->freeNode(d->input);
     vsapi->freeNode(d->sceneBegin);
@@ -27,6 +27,8 @@ static void VS_CC SCSelectFree(void* instanceData, VSCore* core,
 static const VSFrameRef* VS_CC SCSelectGetFrame(
     int32_t n, int32_t activationReason, void** instanceData, void** frameData,
     VSFrameContext* frameCtx, VSCore* core, const VSAPI* vsapi) {
+    (void)frameData;
+    (void)core;
     SCSelectData* d = (SCSelectData*)*instanceData;
 
     if (activationReason == arInitial) {
@@ -97,13 +99,17 @@ static const VSFrameRef* VS_CC SCSelectGetFrame(
 
 static void VS_CC SCSelectInit(VSMap* in, VSMap* out, void** instanceData,
                                VSNode* node, VSCore* core, const VSAPI* vsapi) {
+    (void)in;
+    (void)out;
+    (void)core;
     SCSelectData* d = (SCSelectData*)*instanceData;
     vsapi->setVideoInfo(d->vi, 1, node);
 }
 
 void VS_CC SCSelectCreate(const VSMap* in, VSMap* out, void* userData,
                           VSCore* core, const VSAPI* vsapi) {
-    SCSelectData d = {0};
+    (void)userData;
+    SCSelectData d = {};
 
     d.input = vsapi->propGetNode(in, "input", 0, 0);
     d.vi = vsapi->getVideoInfo(d.input);
@@ -143,6 +149,8 @@ void VS_CC SCSelectCreate(const VSMap* in, VSMap* out, void* userData,
         dFactor = 4.0;
     }
 
+    d.dirmult = dFactor;
+    d.lnr = -2;
     d.hblocks = d.vi->width / (2 * 16);
     d.incpitch = d.hblocks * (-2 * 16);
 
