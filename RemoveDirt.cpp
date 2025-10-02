@@ -335,7 +335,7 @@ static void markneighbours(MotionDetectionDistData* mdd) {
             *isum2++ = (sum += *end++);
         } while (--i);
 
-        i = mdd->hint32_terior; 
+        i = mdd->hint32_terior;
         do {
             *isum2++ = (sum += *end++ - *begin++);
         } while (--i);
@@ -437,7 +437,7 @@ static void markblocks2(MotionDetectionData* md, const uint8_t* p1,
         int32_t i = md->hblocksSSE2;
 
         do {
-            md->blockcompareSSE2(p1, p2, pitch, md->noiselevel); 
+            md->blockcompareSSE2(p1, p2, pitch, md->noiselevel);
             properties[0] = properties[1] = 0;
 
             if (blockcompare_result[0] >= md->threshold) {
@@ -712,7 +712,7 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
         const uint8_t* spV2 = spV;
         uint8_t* cl = pp->mdd.md.blockproperties;
         ++pp->loops;
-        to_restore = 0; 
+        to_restore = 0;
 
         int32_t i = pp->mdd.md.vblocks;
 
@@ -737,8 +737,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                                                       spV2 + Cleftsp, spitchUV,
                                                       pp->mdd.md.noiselevel) +
                                  pp->cthreshold)) {
-                                ++to_restore;
-                                cl[-1] = MOTION_FLAG3;
+                            ++to_restore;
+                            cl[-1] = MOTION_FLAG3;
                         }
                     }
 
@@ -753,8 +753,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                                                       spV2 + Crightsp, spitchUV,
                                                       pp->mdd.md.noiselevel) +
                                  pp->cthreshold)) {
-                                ++to_restore;
-                                cl[1] = MOTION_FLAG3;
+                            ++to_restore;
+                            cl[1] = MOTION_FLAG3;
                         }
                     }
 
@@ -767,8 +767,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                              horizontal_diff_chroma(spU2 + Ctopsp,
                                                     spV2 + Ctopsp, spitchUV) +
                                  pp->cthreshold)) {
-                                ++to_restore;
-                                cl[pp->mdd.md.pline] = MOTION_FLAG3;
+                            ++to_restore;
+                            cl[pp->mdd.md.pline] = MOTION_FLAG3;
                         }
                     }
 
@@ -781,8 +781,8 @@ static void postprocessing(PostProcessingData* pp, uint8_t* dp, int32_t dpitch,
                              horizontal_diff_chroma(
                                  spU2 + Cbottomsp, spV2 + Cbottomsp, spitchUV) +
                                  pp->cthreshold)) {
-                                ++to_restore;
-                                cl[pp->mdd.md.nline] = MOTION_FLAG3;
+                            ++to_restore;
+                            cl[pp->mdd.md.nline] = MOTION_FLAG3;
                         }
                     }
                 }
@@ -822,7 +822,7 @@ static void show_motion(PostProcessingData* pp, uint8_t* u, uint8_t* v,
 
         do {
             if (properties[0]) {
-                uint32_t u_color = u_ncolor; 
+                uint32_t u_color = u_ncolor;
                 uint32_t v_color = v_ncolor;
                 if ((properties[0] & MOTION_FLAG) != 0) {
                     u_color = u_mcolor;
@@ -849,7 +849,7 @@ static void show_motion(PostProcessingData* pp, uint8_t* u, uint8_t* v,
 static void FillMotionDetection(MotionDetectionData* md, const VSMap* in,
                                 VSMap* out, const VSAPI* vsapi,
                                 const VSVideoInfo* vi) {
-    int32_t err;    
+    int32_t err;
     int32_t noise = (int32_t)vsapi->propGetInt(in, "noise", 0, &err);
     if (err) {
         noise = 0;
